@@ -1,0 +1,93 @@
+@{
+  Layout = "_Layout";
+}
+
+
+<br>
+<h1>Dispensary Details:</h1>
+<li>Name: @Model["dispensary"].GetName()</li>
+<li>License: @Model["dispensary"].GetLicense()</li>
+<li>Address: @Model["dispensary"].GetAddress()</li>
+<li>Description: @Model["scraper"].GetDescription()</li>
+<li>Schedule: @Model["scraper"].GetSchedule()</li>
+<hr>
+<h3>Visited @Model["dispensary"].GetName()? Leave your review: </h3>
+
+<form action='/dispensaries/@Model["dispensary"].GetLicense()/comments' method='post'>
+  <textarea id='review' name='review' type='text' required></textarea>
+
+<div class="radio">
+  <label>
+    <input type="radio" name="rating" value="1" checked>
+    🌿
+  </label>
+    <label>
+    <input type="radio" name="rating" value="2" checked>
+    🌿🌿
+  </label>
+  <label>
+    <input type="radio" name="rating" value="3" checked>
+    🌿🌿🌿
+  </label>
+  <label>
+    <input type="radio" name="rating" value="4" checked>
+    🌿🌿🌿🌿
+  </label>
+  <label>
+    <input type="radio" name="rating" value="5" checked>
+    🌿🌿🌿🌿🌿🌿
+  </label>
+</div>
+
+  <button type='submit'>Add Review</button>
+</form>
+
+<hr>
+<h3>Patron reviews: </h3>
+@foreach(var comment in Model["comments"])
+{
+    <li class="commentsList">@comment.GetStars()/5 Stars - @comment.GetDescription()</li>
+}
+
+<hr>
+     <div style="width: 640px; height: 480px" id="mapContainer"></div>
+  <script src="~/js/scripts.js"></script>
+  <script>  
+    var icon = new H.map.Icon('/img/pin1.png');
+          var geocodingParams = {
+          searchText: '@(Model["dispensary"].GetAddress()), @(Model["dispensary"].GetCity()), WA'
+        };
+        addressFinder(geocodingParams);
+
+      
+    function addressFinder(geocodingParams){
+        // Define a callback function to process the geocoding response:
+        var onResult = function(result) {
+          var locations = result.Response.View[0].Result,
+            position,
+            marker;
+          // Add a marker for each location found
+          for (i = 0;  i < locations.length; i++) {
+          position = {
+            lat: locations[i].Location.DisplayPosition.Latitude,
+            lng: locations[i].Location.DisplayPosition.Longitude
+          };
+          coords={ 
+            lng: locations[i].Location.DisplayPosition.Longitude, 
+            lat: locations[i].Location.DisplayPosition.Latitude
+            },
+          marker = new H.map.Marker(position, {icon: icon});
+          map.addObject(marker);
+          map.setCenter(coords);
+          }
+        };
+    
+        var geocoder = platform.getGeocodingService();
+        // Call the geocode method with the geocoding parameters,
+        // the callback and an error callback function (called if a
+        // communication error occurs):
+        geocoder.geocode(geocodingParams, onResult, function(e) {
+          alert(e);
+        });
+      };
+    </script>

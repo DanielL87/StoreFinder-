@@ -1,0 +1,68 @@
+@{
+  Layout = "_Layout";
+}
+
+<h1>Search for Dispensaries:</h1>
+<br>
+ <div class="col-md-5">
+    <form action='/dispensaries/searchbyname' method='post'>
+      <label for='storeName'>Search by Dispensary name: </label>
+      <input id='storeName' name='storeName' type='text'>
+      <br>
+      <button type='submit'>Search</button>
+    </form>
+    <br>
+     <form action='/dispensaries/searchbycity' method='post'>
+      <label for='city'>Search by your city: </label>
+      <input id='city' name='city' type='text'>
+      <br>
+      <button type='submit'>Search</button>
+    </form>
+</div>
+    
+  
+
+<div class="row">
+  <div class="col-md-5">
+     <div style="width: 640px; height: 480px" id="mapContainer"></div>
+      <script src="~/js/scripts.js"></script>
+      <script>  
+          var icon = new H.map.Icon('/img/pin1.png');
+          @foreach(var address in @Model["addresses"])
+          {
+            <text>
+              var geocodingParams = {
+              searchText: '@(address.GetAddress()), @(address.GetCity()), WA'
+            };
+            addressFinder(geocodingParams);
+            </text>
+          }
+          
+        function addressFinder(geocodingParams){
+            // Define a callback function to process the geocoding response:
+            var onResult = function(result) {
+              var locations = result.Response.View[0].Result,
+                position,
+                marker;
+              // Add a marker for each location found
+              for (i = 0;  i < locations.length; i++) {
+              position = {
+                lat: locations[i].Location.DisplayPosition.Latitude,
+                lng: locations[i].Location.DisplayPosition.Longitude
+              };
+              marker = new H.map.Marker(position, {icon: icon});
+              map.addObject(marker);
+              map.setCenter({lat: locations[i].Location.DisplayPosition.Latitude, lng: locations[i].Location.DisplayPosition.Longitude});
+              }
+            };
+        
+            var geocoder = platform.getGeocodingService();
+            // Call the geocode method with the geocoding parameters,
+            // the callback and an error callback function (called if a
+            // communication error occurs):
+            geocoder.geocode(geocodingParams, onResult, function(e) {
+              alert(e);
+            });
+          };
+        </script>
+  </div>
